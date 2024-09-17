@@ -35,4 +35,35 @@
 
 namespace ImGui {
     bool Knob(const char* label, double* value_p, float circumference = 40.0);
+    
+    namespace Knobs {
+        enum Type {
+            // Minimalist, just the base circle
+            BLANK, // Draw only the base circle
+            // Draw the base and the indicator
+            BASIC,
+        };
+
+        // Structs to simplify styling
+        struct Circle {
+            ImU32 color;
+            float base_circum;
+            int base_segments;
+        };
+
+        struct Line {
+            ImU32 color;
+            float thickness;
+        };
+        
+    }
+
+
+    struct KnobStyle {
+        enum Knobs::Type type;
+
+        Circle base;    // Foundation of the knob
+        Line indicator; // Indicator that follows from center to knob direction
+        Circle cover;   // A neccessary cover for the indicator
+    };
 }

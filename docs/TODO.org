@@ -16,6 +16,10 @@ For easy online viewing just use github, it supports the majority of orgmode fea
   - [ ] WrapAround (Going past 360 degrees wraps around)
 - [ ] AngleOffset (Allow for internal change to what is "0" degrees)
 
+* TODO Knob Styles [0/3] [0%]
+- [ ] Define a KnobStyle struct
+- [ ] Have enum to determine styling
+- [ ] Union of structs, 1 per style
 * TODO Custom data ranges. [0/3] [0%]
 - [ ] Create a data min and data max field which the angle of the knob is changed to
   - [ ] Make Robust /(Things like the min being larger then the max, min == max, etc.)/

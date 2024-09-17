@@ -48,7 +48,7 @@ double findAngleDifference(ImVec2 src, ImVec2 dest)
 /*
  * Returns if the value has been changed
  */
-bool ImGui::Knob(const char* label, double* value_p, float circumference)
+bool ImGui::Knob(const char* label, double* value_p, const float ImGui::KnobStyle)
 {
     bool has_value_changed = false;
 

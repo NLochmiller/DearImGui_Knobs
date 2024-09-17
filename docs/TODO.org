@@ -8,8 +8,9 @@ For easy online viewing just use github, it supports the majority of orgmode fea
 * TODO Basics [2/6] [33%]
 - [X] Create a widget
 - [X] Draw a Circle
-- [ ] If active
-  - [ ] Read user input and calculate angle, adjusting knob to point towards user input
+- [-] If active
+  - [X] Read user input and calculate angle,
+  - [ ] adjusting knob to point towards user input
 - [ ] Draw a line on the circle to indicate pointer
 - [ ] Flags
   - [ ] WrapAround (Going past 360 degrees wraps around)

@@ -33,10 +33,16 @@
 #include <math.h>
 #include "DearImGui_Knobs.hpp"
 
+// Convert radians to degrees
+double radToDeg(double a)
+{
+    return a * 180/M_PI;
+}
+
 // Finds the angle from src to dest
 double findAngleDifference(ImVec2 src, ImVec2 dest)
 {
-    return 0.0;
+    return atan2(dest.y - src.y, dest.x - src.x);
 }
 
 /*
@@ -77,6 +83,8 @@ bool ImGui::Knob(const char* label, double* value_p, float circumference)
     }
 
     /* Draw knob */
+    // Draw base, then line from center to edge, then an inner circle to cutoff
+    // line
     int segments = 0;
     ImU32 circle_col = ImGui::GetColorU32(ImGuiCol_FrameBg);
     draw_list->AddCircleFilled(center, outer_radius, circle_col, segments);

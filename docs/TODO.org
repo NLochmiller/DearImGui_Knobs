@@ -5,21 +5,21 @@
 This is an org mode document. See [[https://orgmode.org][orgmode.org]] for general information on orgmode.
 For easy online viewing just use github, it supports the majority of orgmode features.
 
-* TODO Basics [2/6] [33%]
+* TODO Basics [4/6] [66%]
 - [X] Create a widget
 - [X] Draw a Circle
-- [-] If active
+- [X] If active
   - [X] Read user input and calculate angle,
-  - [ ] adjusting knob to point towards user input
-- [ ] Draw a line on the circle to indicate pointer
+  - [X] adjusting knob to point towards user input
+- [X] Draw a line on the circle to indicate pointer
 - [ ] Flags
   - [ ] WrapAround (Going past 360 degrees wraps around)
 - [ ] AngleOffset (Allow for internal change to what is "0" degrees)
 
-* TODO Knob Styles [0/3] [0%]
-- [ ] Define a KnobStyle struct
-- [ ] Have enum to determine styling
-- [ ] Union of structs, 1 per style
+* TODO Knob Styles [2/3] [66%]
+- [X] Define a KnobStyle struct
+- [X] Have enum to determine styling
+  
 * TODO Custom data ranges. [0/3] [0%]
 - [ ] Create a data min and data max field which the angle of the knob is changed to
   - [ ] Make Robust /(Things like the min being larger then the max, min == max, etc.)/

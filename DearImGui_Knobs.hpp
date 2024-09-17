@@ -33,8 +33,9 @@
 
 #include "imgui.h"
 
+
 namespace ImGui {
-    bool Knob(const char* label, double* value_p, float circumference = 40.0);
+
     
     namespace Knobs {
         enum Type {
@@ -47,8 +48,8 @@ namespace ImGui {
         // Structs to simplify styling
         struct Circle {
             ImU32 color;
-            float base_circum;
-            int base_segments;
+            float radius; // Circumference of this circle
+            int segments;
         };
 
         struct Line {
@@ -59,11 +60,23 @@ namespace ImGui {
     }
 
 
-    struct KnobStyle {
+    class KnobStyle {
+    public:
+        KnobStyle();
+        
         enum Knobs::Type type;
 
-        Circle base;    // Foundation of the knob
-        Line indicator; // Indicator that follows from center to knob direction
-        Circle cover;   // A neccessary cover for the indicator
+        Knobs::Circle base;    // Foundation of the knob
+        Knobs::Line indicator; // Indicator that goes from center to direction
+        Knobs::Circle cover;   // A neccessary cover for the indicator
+
+
+        
     };
+
+    bool Knob(const char* label, double* value_p,
+              ImGui::KnobStyle knobStyle = KnobStyle());
 }
+
+
+

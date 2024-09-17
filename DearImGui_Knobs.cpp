@@ -33,11 +33,6 @@
 #include <math.h>
 #include "DearImGui_Knobs.hpp"
 
-// Convert radians to degrees
-double radToDeg(double a)
-{
-    return a * 180/M_PI;
-}
 
 // Finds the angle from src to dest
 double findAngleDifference(ImVec2 src, ImVec2 dest)
@@ -45,29 +40,58 @@ double findAngleDifference(ImVec2 src, ImVec2 dest)
     return atan2(dest.y - src.y, dest.x - src.x);
 }
 
+ImGui::KnobStyle::KnobStyle()
+{
+    type = ImGui::Knobs::BASIC;
+    base = {
+        .color = ImGui::GetColorU32(ImGuiCol_FrameBg),
+        .radius = 20,
+        .segments = 0,
+    };
+    indicator = {
+        .color = ImGui::GetColorU32(ImGuiCol_SliderGrabActive),
+        .thickness = 2.0f
+    };
+    cover = {
+        .color = ImGui::GetColorU32(ImGuiCol_FrameBg),
+        .radius = 8,
+        .segments = 0,
+    };
+}
+
+// Forward declerations
+void drawCircle(ImDrawList* draw_list, ImVec2 center, ImGui::Knobs::Circle c)
+{
+    draw_list->AddCircleFilled(center, c.radius, c.color, c.segments);
+}
+
+void drawLine(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImGui::Knobs::Line l)
+{
+    draw_list->AddLine(p1, p2, l.color, l.thickness);
+}
+
 /*
  * Returns if the value has been changed
+ * If knob style is null, uses default basic style seen above.
  */
-bool ImGui::Knob(const char* label, double* value_p, const float ImGui::KnobStyle)
+bool ImGui::Knob(const char* label, double* value_p, ImGui::KnobStyle knobStyle)
 {
     bool has_value_changed = false;
 
     // Get io and styling
     ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
-    float line_height = ImGui::GetTextLineHeight();
+    // If ever want text, use float line_height = ImGui::GetTextLineHeight();
+
+    float radius = knobStyle.base.radius;
 
     // Get positioning data
-    float outer_radius = circumference / 2;
     ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImVec2 center = ImVec2(pos.x + outer_radius, pos.y + outer_radius);
-
-
+    ImVec2 center = ImVec2(pos.x + radius, pos.y + radius);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
     // The area occupied by this knob
-    ImVec2 area = ImVec2(circumference,
-                         circumference + line_height + style.ItemInnerSpacing.y
-                         );
+    ImVec2 area = ImVec2(radius * 2, radius * 2 + style.ItemInnerSpacing.y);
 
     // Use an invisible button to detect user input
     ImGui::InvisibleButton(label, area);
@@ -76,18 +100,31 @@ bool ImGui::Knob(const char* label, double* value_p, const float ImGui::KnobStyl
     // If the user has moved at all, while clicking on this
     if (is_active && (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f))
     {
-        // Calculate the angle from center to users cursor
         ImVec2 mouse_pos = io.MousePos;
         *value_p = findAngleDifference(center, mouse_pos);
         has_value_changed = true;
     }
 
+    // Precalculate values needed
+    float angle = *value_p;
+    float angle_cos = cosf(angle), angle_sin = sinf(angle);
+        
     /* Draw knob */
-    // Draw base, then line from center to edge, then an inner circle to cutoff
-    // line
-    int segments = 0;
-    ImU32 circle_col = ImGui::GetColorU32(ImGuiCol_FrameBg);
-    draw_list->AddCircleFilled(center, outer_radius, circle_col, segments);
+    switch (knobStyle.type) {
+    case ImGui::Knobs::BLANK:
+        drawCircle(draw_list, center, knobStyle.base);
+        break;
+    case ImGui::Knobs::BASIC:
+        drawCircle(draw_list, center, knobStyle.base);
+        ImVec2 p1 = ImVec2(center.x + angle_cos*knobStyle.cover.radius,
+                           center.y + angle_sin*knobStyle.cover.radius);
+        int thickness = knobStyle.indicator.thickness;
+        ImVec2 p2 = ImVec2(center.x + angle_cos * (radius - thickness),
+                           center.y + angle_sin * (radius - thickness));
+        drawLine(draw_list, p1, p2, knobStyle.indicator);
+    }
+    
 
     return has_value_changed;
 }
+

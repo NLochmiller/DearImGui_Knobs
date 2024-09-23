@@ -31,7 +31,21 @@
 
 #include "imgui.h"
 #include <math.h>
+#include <cstdio>
 #include "DearImGui_Knobs.hpp"
+
+
+// Helpers for ImGui drawing
+void drawCircle(ImDrawList* draw_list, ImVec2 center, ImGui::Knobs::Circle c)
+{
+    draw_list->AddCircleFilled(center, c.radius, c.color, c.segments);
+}
+
+void drawLine(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImGui::Knobs::Line l)
+{
+    draw_list->AddLine(p1, p2, l.color, l.thickness);
+}
+
 
 
 // Finds the angle from src to dest
@@ -48,26 +62,12 @@ ImGui::KnobStyle::KnobStyle()
         .radius = 20,
         .segments = 0,
     };
-    indicator = {
-        .color = ImGui::GetColorU32(ImGuiCol_SliderGrabActive),
-        .thickness = 2.0f
-    };
+    indicator = new LineIndicator();
     cover = {
         .color = ImGui::GetColorU32(ImGuiCol_FrameBg),
         .radius = 8,
         .segments = 0,
     };
-}
-
-// Forward declerations
-void drawCircle(ImDrawList* draw_list, ImVec2 center, ImGui::Knobs::Circle c)
-{
-    draw_list->AddCircleFilled(center, c.radius, c.color, c.segments);
-}
-
-void drawLine(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImGui::Knobs::Line l)
-{
-    draw_list->AddLine(p1, p2, l.color, l.thickness);
 }
 
 /*
@@ -96,7 +96,7 @@ bool ImGui::Knob(const char* label, double* value_p, ImGui::KnobStyle knobStyle)
     // Use an invisible button to detect user input
     ImGui::InvisibleButton(label, area);
     bool is_active = ImGui::IsItemActive();
-    bool is_hovered = ImGui::IsItemHovered();
+    // bool is_hovered = ImGui::IsItemHovered();
     // If the user has moved at all, while clicking on this
     if (is_active && (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f))
     {
@@ -106,8 +106,8 @@ bool ImGui::Knob(const char* label, double* value_p, ImGui::KnobStyle knobStyle)
     }
 
     // Precalculate values needed
+    // TODO: Convert from value space to angle space
     float angle = *value_p;
-    float angle_cos = cosf(angle), angle_sin = sinf(angle);
         
     /* Draw knob */
     switch (knobStyle.type) {
@@ -116,15 +116,8 @@ bool ImGui::Knob(const char* label, double* value_p, ImGui::KnobStyle knobStyle)
         break;
     case ImGui::Knobs::BASIC:
         drawCircle(draw_list, center, knobStyle.base);
-        ImVec2 p1 = ImVec2(center.x + angle_cos*knobStyle.cover.radius,
-                           center.y + angle_sin*knobStyle.cover.radius);
-        int thickness = knobStyle.indicator.thickness;
-        ImVec2 p2 = ImVec2(center.x + angle_cos * (radius - thickness),
-                           center.y + angle_sin * (radius - thickness));
-        drawLine(draw_list, p1, p2, knobStyle.indicator);
+        knobStyle.indicator->render(draw_list, angle, center, knobStyle);
     }
-    
 
     return has_value_changed;
 }
-

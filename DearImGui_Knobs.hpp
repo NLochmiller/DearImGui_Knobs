@@ -29,15 +29,27 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef DEARIMGUI_KNOBS_HPP_
+#define DEARIMGUI_KNOBS_HPP_
+
 #pragma once
 
+#include <math.h>
 #include "imgui.h"
 
 
 namespace ImGui {
 
+    // Forward decleration
+    class KnobStyle;
     
     namespace Knobs {
+        class Indicator {
+        public:
+            virtual void render(ImDrawList* draw_list, double angle,
+                                ImVec2 center, KnobStyle style) = 0;
+        };
+        
         enum Type {
             // Minimalist, just the base circle
             BLANK, // Draw only the base circle
@@ -56,7 +68,6 @@ namespace ImGui {
             ImU32 color;
             float thickness;
         };
-        
     }
 
 
@@ -67,16 +78,64 @@ namespace ImGui {
         enum Knobs::Type type;
 
         Knobs::Circle base;    // Foundation of the knob
-        Knobs::Line indicator; // Indicator that goes from center to direction
+        Knobs::Indicator* indicator; // Indicator of angle
         Knobs::Circle cover;   // A neccessary cover for the indicator
-
-
-        
     };
 
     bool Knob(const char* label, double* value_p,
               ImGui::KnobStyle knobStyle = KnobStyle());
+
+
+    // TODO: Move to a better location (New file?)
+    // Inherit from knobs indicator
+    // Has public variables internalPadding and externalPadding, which is how much
+    // padding should be between the center and edge of the base circle respectively
+    class LineIndicator: public ImGui::Knobs::Indicator {
+    public:
+
+        float internalPadding;
+        float externalPadding;
+        ImU32 color;
+        float thickness;
+    
+        LineIndicator(float internalPadding, float externalPadding, ImU32 color,
+                      float thickness) {
+            this->internalPadding = internalPadding;
+            this->externalPadding = externalPadding;
+            this->color = color;
+            this->thickness = thickness;
+        }
+    
+        LineIndicator() {
+            this->internalPadding = 0.0f;
+            this->externalPadding = 0.0f;
+            this->color = IM_COL32(255, 255, 255, 255);
+            this->thickness = 2.0f;
+        }
+
+        // Render the indicator
+        void render(ImDrawList* draw_list, double angle, ImVec2 center,
+                    ImGui::KnobStyle knobStyle) {
+            double radius = knobStyle.base.radius;
+            float angle_cos = cosf(angle), angle_sin = sinf(angle);
+
+            // Trig to get the points on the line such that the internal and
+            // external padding are the points on the line drawn
+            ImVec2 inner_point = ImVec2(center.x +
+                                        (angle_cos * this->internalPadding),
+                                        center.y +
+                                        (angle_sin * this->internalPadding));
+            ImVec2 edge_point = ImVec2(center.x + (angle_cos * radius),
+                                       center.y + (angle_sin * radius));
+            // Point on the outer padding
+            ImVec2 outer_point = ImVec2(edge_point.x -
+                                        (angle_cos * this->externalPadding),
+                                        edge_point.y -
+                                        (angle_sin * this->externalPadding));
+            draw_list->AddLine(inner_point, outer_point, this->color,
+                               this->thickness);
+        }
+    };
 }
 
-
-
+#endif // DEARIMGUI_KNOBS_HPP_

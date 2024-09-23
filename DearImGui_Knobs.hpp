@@ -37,7 +37,6 @@
 #include <math.h>
 #include "imgui.h"
 
-
 namespace ImGui {
 
     // Forward decleration
@@ -73,7 +72,8 @@ namespace ImGui {
 
     class KnobStyle {
     public:
-        KnobStyle();
+        // KnobStyle();
+        KnobStyle(Knobs::Indicator* indicator = NULL);
         
         enum Knobs::Type type;
 
@@ -134,6 +134,58 @@ namespace ImGui {
                                         (angle_sin * this->externalPadding));
             draw_list->AddLine(inner_point, outer_point, this->color,
                                this->thickness);
+        }
+    };
+
+    // A simple circle as the indicator
+    class IndicatorDot: public ImGui::Knobs::Indicator {
+    public:
+        float inner_padding;
+        float outer_padding;
+        ImU32 color;
+        float radius;
+        int segments;
+
+        IndicatorDot(float inner_padding = 0.0f, float outer_padding = 0.0f,
+                     float radius = 5.0f,
+                     ImU32 color = IM_COL32(255, 255, 255, 255),
+                     int segments = 0)
+        {
+            this->inner_padding = inner_padding;
+            this->outer_padding = outer_padding;
+            this->radius = radius;
+            this->color = color;
+            this->segments = 0;
+        }
+
+        void render(ImDrawList* draw_list, double angle, ImVec2 center,
+                    ImGui::KnobStyle knobStyle) {
+
+            double radius = knobStyle.base.radius;
+            float angle_cos = cosf(angle), angle_sin = sinf(angle);
+
+
+            // Trig to get the points on the line such that the internal and
+            // external padding are the points on the line drawn
+            ImVec2 inner_point = ImVec2(center.x +
+                                        (angle_cos * this->inner_padding),
+                                        center.y +
+                                        (angle_sin * this->inner_padding));
+            ImVec2 edge_point = ImVec2(center.x + (angle_cos * radius),
+                                       center.y + (angle_sin * radius));
+            // Point on the outer padding
+            ImVec2 outer_point = ImVec2(edge_point.x -
+                                        (angle_cos * this->outer_padding),
+                                        edge_point.y -
+                                        (angle_sin * this->outer_padding));
+
+            ImVec2 mid_point = ImVec2(inner_point.x +
+                                      (outer_point.x - inner_point.x) / 2,
+                                      inner_point.y +
+                                      (outer_point.y - inner_point.y) / 2);
+            
+            draw_list->AddCircleFilled(mid_point, this->radius, this->color,
+                                       this->segments);
         }
     };
 }

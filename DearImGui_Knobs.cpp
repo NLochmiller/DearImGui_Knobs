@@ -54,16 +54,21 @@ double findAngleDifference(ImVec2 src, ImVec2 dest)
     return atan2(dest.y - src.y, dest.x - src.x);
 }
 
-ImGui::KnobStyle::KnobStyle()
+ImGui::KnobStyle::KnobStyle(Knobs::Indicator* indicator)
 {
-    type = ImGui::Knobs::BASIC;
-    base = {
+    this->type = ImGui::Knobs::BASIC;
+    this->base = {
         .color = ImGui::GetColorU32(ImGuiCol_FrameBg),
         .radius = 20,
         .segments = 0,
     };
-    indicator = new LineIndicator();
-    cover = {
+    // Set to new LineIndicator if null, else set to given indicator
+    if (indicator == NULL) {
+        this->indicator = new LineIndicator();
+    } else {
+        this->indicator = indicator;
+    }
+    this->cover = {
         .color = ImGui::GetColorU32(ImGuiCol_FrameBg),
         .radius = 8,
         .segments = 0,
